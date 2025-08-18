@@ -1,0 +1,15 @@
+{
+  "fold_smape": [
+    NaN,
+    NaN,
+    NaN,
+    NaN,
+    NaN,
+    NaN,
+    NaN,
+    NaN,
+    NaN,
+    NaN
+  ],
+  "oof_smape": 10.62093921456703
+}
