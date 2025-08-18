@@ -6,8 +6,8 @@
 
 | 순번 | 파일 | 생성시각(로컬) | Score | Notes |
 |---:|---|---|---:|---|
-| 1 | outputs/submissions/sub_baseline.csv | 2024-08-18 21:28 |  | 0.5*lag168 + 0.5*roll_mean_168 베이스라인 |
-| 2 | outputs/submissions/sub_linear.csv | 2024-08-18 21:39 |  | 잔차 릿지 모델 OOF≈10.62 |
+| 1 | outputs/submissions/sub_baseline.csv | 2024-08-18 21:28 | 18.1558674197 | 0.5*lag168 + 0.5*roll_mean_168 베이스라인 |
+| 2 | outputs/submissions/sub_linear.csv | 2024-08-18 21:39 | 14.2267167935 | 잔차 릿지 모델 OOF≈10.62 |
 | 3 | outputs/submissions/sub_gbm.csv | 2024-08-18 21:53 |  | 잔차 GBM(HGB) OOF≈11.71 |
 | 4 | outputs/submissions/sub_ens.csv | 2024-08-18 22:00 |  | linear+gbm 평균 앙상블 |
 | 5 | outputs/submissions/sub_ens_weighted.csv | 2024-08-18 22:07 |  | linear+gbm OOF 가중(그리드) |
