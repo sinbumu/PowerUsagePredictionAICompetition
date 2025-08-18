@@ -15,6 +15,7 @@
   2. **LGBM(메인) + CatBoost(보조)** → 가중 앙상블
   3. (선택) **xPatch/PDMLP** 잔차 예측으로 얹어 소폭 앙상블
   4. (선택) 저부하 시간대 **Amplifier 전처리** A/B 테스트
+  5. 데이터 제약 반영: `test.csv`에는 **일조/일사(now)** 부재 → 일조/일사는 **과거 기반(lag/rolling)**만 사용, (선택) **프록시 now_hat**으로 보강
 * **검증(CV)**: 7일 블록, 시작 전 24–48h gap, SMAPE로 통일
 * **재현성**: 상대경로, 버전 고정, `run_train.sh` / `run_infer.sh`
 
@@ -33,6 +34,7 @@
 │   ├── config.py              # 경로/시드/상수
 │   ├── io.py                  # 로딩/저장 유틸
 │   ├── features.py            # 누수-안전 피처 생성
+│   ├── weather_imputer.py     # (선택) 일조/일사 프록시(now_hat) 추정
 │   ├── metrics.py             # smape()
 │   ├── cv.py                  # 블록 시계열 CV 분할
 │   ├── models_lgbm.py         # 잔차 LGBM 학습/추론
@@ -63,6 +65,16 @@
   * `building_id`, `timestamp`, `load(kWh)`
   * 기상: `temp, rain, wind, humid, sunshine, irradiance`
   * 메타: `type, total_area, cooling_area, pv_capacity, ess_capacity, pcs_capacity`
+  
+* `test.csv` 제약 사항
+
+  * `sunshine(일조)`, `irradiance(일사)`의 **now 값이 존재하지 않음** → now 기반 생성/차분 불가
+
+* **컬럼 매핑(한글+단위 → 내부 표준명)**
+
+  * `건물번호→building_id`, `일시→timestamp`, `전력소비량(kWh)→load`
+  * `기온(°C)→temp`, `강수량(mm)→rain`, `풍속(m/s)→wind`, `습도(%)→humid`
+  * `일조(hr)→sunshine`, `일사(MJ/m2)→irradiance`
 * **누수 방지 규칙**
 
   * 모든 rolling은 `groupby(building).shift(1)` **이후** 적용
@@ -85,9 +97,16 @@
   * 모델 `f(X_t)`가 `r_t`를 예측 → 최종 `ŷ_t = clip(y_{t-168} + r̂_t, 0, ∞)`
 * **시간 특징**: `hour, dow, is_weekend, dayofyear, month`, (sin/cos 주기)
 * **부하 라그/롤링**: `lag_1, lag_24, lag_168`, (shift1 후) `roll_mean_24/168, roll_std_24`
-* **기상 특징**: 현재(예보) + 1주전(관측 대리) + **차분**(`*_diff = now - lag168`)
+* **기상 특징 (데이터 제약 반영)**
+
+  * now(예보) 사용 가능: `temp, rain, wind, humid`
+  * `sunshine, irradiance`는 **now 미제공** → **과거 기반만** 사용:
+    - `lag168`, (shift1 후) `rolling_mean_24/168`, `rolling_std_24` 등
+  * 차분(`*_diff = now - lag168`)은 **일조/일사에 대해 생성하지 않음**
+  * (선택) 프록시: `sunshine_now_hat`, `irradiance_now_hat`을 생성하여 사용 가능
+    - 사용 시 `*_diff_hat = now_hat - lag168`으로 대체 차분 구성
 * **냉난방 민감도**: `cdd=max(temp-24,0)`, `hdd=max(18-temp,0)`, 주차 차분 포함
-* **메타 상호작용**: `pv_capacity*irradiance`, `area` 정규화(선택), `type` 카테고리
+* **메타 상호작용**: `pv_capacity*irradiance_lag168`/`*sunshine_roll_mean_168`, `area` 정규화(선택), `type` 카테고리
 * **선택(주파수 분해 피처)**: 24/48/168h 이동평균/잔차로 **저·중·고주파 밴드** 생성
 
 ---
@@ -166,11 +185,24 @@
 ### Card 05 — features (누수-안전)
 
 **프롬프트**
-“`src/features.py`에 시간, 라그/롤링(shift1→rolling), 기상 차분(now−lag168), cdd/hdd, 메타 상호작용 구현. 모든 변환은 **train에서 fit, test는 transform만** 하도록 함수 분리.”
+“`src/features.py`에 시간, 라그/롤링(shift1→rolling), now 기반 기상 차분은 `temp/rain/wind/humid`만 생성, `sunshine/irradiance`는 now·차분 없이 **과거 기반(lag168/rolling)만** 사용, cdd/hdd, 메타 상호작용(`pv×irradiance_lag168` 등) 구현. 모든 변환은 **train에서 fit, test는 transform만** 하도록 함수 분리.”
 **DoD**
 
 * 학습/추론 경로에서 동일 함수로 재현
 * 누수 관련 유닛 체크(현재 시점 미포함)
+
+---
+
+### Card 05b — weather_imputer (선택, 강력 추천)
+
+**프롬프트**
+“`src/weather_imputer.py` 구현: 입력(`hour, dow, dayofyear, temp, humid, wind, rain`[+선택: type])로 `sunshine`/`irradiance` **프록시(now_hat)** 회귀모델 학습. **블록 시계열 CV(7일+gap)** 로 train OOF `*_now_hat_oof` 생성 → 최종 전체 학습 모델로 test에 `*_now_hat` 추론. 메인 모델에 추가 채널로 투입하여 A/B/C 비교.”
+
+**DoD**
+
+* train에 `sunshine_now_hat_oof`, `irradiance_now_hat_oof` 생성
+* test에 `sunshine_now_hat`, `irradiance_now_hat` 생성
+* CV 리포트(OOF MAE)와 메인 모델 A/B/C 비교 로그 저장
 
 ---
 
@@ -293,6 +325,9 @@
 * [ ] sample\_submission과 ID 정렬/행수 일치
 * [ ] 내부 CV SMAPE, 세그먼트(요일/시간/유형) 리포트
 * [ ] 최종 1개 제출 파일 선택
+* [ ] `sunshine/irradiance`는 **now·차분 미생성**, 과거 기반(lag/rolling)만 사용 확인
+* [ ] (선택) imputer `*_now_hat`: **train=OOF**, **test=최종모델** 구분 적용
+* [ ] A(과거만)/B(과거+now_hat)/C(제거) **CV 비교 로그** 저장
 
 ---
 
