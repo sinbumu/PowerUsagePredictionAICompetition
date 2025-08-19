@@ -8,9 +8,9 @@
 |---:|---|---|---:|---|
 | 1 | outputs/submissions/sub_baseline.csv | 2024-08-18 21:28 | 18.1558674197 | 0.5*lag168 + 0.5*roll_mean_168 베이스라인 |
 | 2 | outputs/submissions/sub_linear.csv | 2024-08-18 21:39 | 14.2267167935 | 잔차 릿지 모델 OOF≈10.62 |
-| 3 | outputs/submissions/sub_gbm.csv | 2024-08-18 21:53 |  | 잔차 GBM(HGB) OOF≈11.71 |
-| 4 | outputs/submissions/sub_ens.csv | 2024-08-18 22:00 |  | linear+gbm 평균 앙상블 |
-| 5 | outputs/submissions/sub_ens_weighted.csv | 2024-08-18 22:07 |  | linear+gbm OOF 가중(그리드) |
+| 3 | outputs/submissions/sub_gbm.csv | 2024-08-18 21:53 | 21.1654366059 | 잔차 GBM(HGB) OOF≈11.71 |
+| 4 | outputs/submissions/sub_ens.csv | 2024-08-18 22:00 | 15.1766973185 | linear+gbm 평균 앙상블 |
+| 5 | outputs/submissions/sub_ens_weighted.csv | 2024-08-18 22:07 | 16.6923054153 | linear+gbm OOF 가중(그리드) |
 | 6 | outputs/submissions/sub_cat.csv | 2024-08-18 22:12 |  | 잔차 CatBoost(폴백 HGB) OOF≈11.79 |
 | 7 | outputs/submissions/sub_ens_weighted_3.csv | 2024-08-18 22:14 |  | 3모델 OOF 가중(예: [0.48,0.18,0.34], CV≈9.66) |
 
