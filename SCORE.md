@@ -13,6 +13,9 @@
 | 5 | outputs/submissions/sub_ens_weighted.csv | 2024-08-18 22:07 | 16.6923054153 | linear+gbm OOF 가중(그리드) |
 | 6 | outputs/submissions/sub_cat.csv | 2024-08-18 22:12 | 11.2086699547 | 잔차 CatBoost(폴백 HGB) OOF≈11.79 |
 | 7 | outputs/submissions/sub_ens_weighted_3.csv | 2024-08-18 22:14 | 12.3305017468 | 3모델 OOF 가중(예: [0.48,0.18,0.34], CV≈9.66) |
+| 8 | outputs/submissions/sub_cat_smape_anchor_bias.csv | 2025-08-20 10:23 | 11.8684615387 | CatBoost: SMAPE 가중+앵커드CV+바이어스 보정, OOF≈10.23 |
+| 9 | outputs/submissions/sub_cat_anchor.csv | 2025-08-20 10:29 |  | CatBoost: 앵커드CV만(가중/바이어스 없음), OOF≈12.06 |
+| 10 | outputs/submissions/sub_cat_smape_anchor.csv | 2025-08-20 10:30 |  | CatBoost: 앵커드CV+SMAPE 가중(바이어스 없음), OOF≈9.82 |
 
 가이드
 - 점수 입력 형식 예: `18.1558674197` -> 해당 사이에서 submission csv 넣을 시 단일 점수만줌. 
