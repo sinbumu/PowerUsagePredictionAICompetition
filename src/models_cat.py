@@ -13,6 +13,7 @@ from .config import MODELS_DIR
 from .metrics import smape
 from .features import FeatureBuilder
 from .cv import BlockTimeSeriesSplit, last_weeks_splits
+from .weather_imputer import generate_now_hat
 from .baseline import build_lag_features as build_lag_for_test
 
 try:
@@ -43,6 +44,12 @@ def _select_features(df: pd.DataFrame, allow_cat: bool) -> List[str]:
 			continue
 		if pd.api.types.is_numeric_dtype(df[c]):
 			cols.append(c)
+	# include imputer features if present (generic names only)
+	for base in ["sunshine", "irradiance"]:
+		for suf in ["now_hat", "diff_hat"]:
+			c = f"{base}_{suf}"
+			if c in df.columns:
+				cols.append(c)
 	return cols
 
 
@@ -54,6 +61,18 @@ def train_cat_residual(train_df: pd.DataFrame, building_info: pd.DataFrame, save
 	os.makedirs(save_dir, exist_ok=True)
 	fb = FeatureBuilder()
 	fe, _ = fb.transform(train_df, building_info=building_info)
+	# weather imputer OOF for train
+	try:
+		fe_imp, _ = generate_now_hat(fe, fe, save_dir=os.path.join(save_dir, "_imp"))
+		for base in ["sunshine", "irradiance"]:
+			src = f"{base}_now_hat_oof"
+			if src in fe_imp.columns:
+				# mirror OOF into generic names used by inference
+				fe[f"{base}_now_hat"] = fe_imp[src].values
+				if f"{base}_lag168" in fe.columns:
+					fe[f"{base}_diff_hat"] = fe[f"{base}_now_hat"] - fe[f"{base}_lag168"]
+	except Exception:
+		pass
 	if "lag_168" not in fe.columns:
 		raise RuntimeError("lag_168 missing in features")
 	fe["residual"] = fe["load"] - fe["lag_168"]
@@ -153,9 +172,21 @@ def infer_cat_residual(train_df: pd.DataFrame, test_df: pd.DataFrame, building_i
 	combo = pd.concat([train_subset, test_subset], ignore_index=True)
 	fb = FeatureBuilder()
 	combo_feat, _ = fb.transform(combo, building_info=building_info)
+	# imputer for test
+	try:
+		_, test_imp = generate_now_hat(train_df, test_df, save_dir=os.path.join(model_dir, "_imp"))
+		for base in ["sunshine", "irradiance"]:
+			if f"{base}_now_hat" in test_imp.columns:
+				combo_feat.loc[combo_feat["is_test"]==1, f"{base}_now_hat"] = test_imp[f"{base}_now_hat"].values
+	except Exception:
+		pass
 	test_feat = combo_feat[combo_feat["is_test"]==1].copy().reset_index(drop=True)
 	# attach lag history
 	test_feat = test_feat.merge(test_hist[["building_id","timestamp","lag_168","roll_mean_168"]], on=["building_id","timestamp"], how="left")
+	# construct diff_hat if available
+	for base in ["sunshine", "irradiance"]:
+		if f"{base}_now_hat" in test_feat.columns and f"{base}_lag168" in test_feat.columns:
+			test_feat[f"{base}_diff_hat"] = test_feat[f"{base}_now_hat"] - test_feat[f"{base}_lag168"]
 
 	with open(os.path.join(model_dir, "feature_names.json"), "r", encoding="utf-8") as f:
 		meta = json.load(f)

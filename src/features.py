@@ -12,6 +12,7 @@ TIME_FEATURE_COLUMNS = [
 	"is_weekend",
 	"dayofyear",
 	"month",
+	"hour_of_week",
 	"hour_sin",
 	"hour_cos",
 	"dow_sin",
@@ -29,6 +30,25 @@ LOAD_FEATURE_COLUMNS = [
 
 WEATHER_NOW_COLUMNS = ["temp", "rain", "wind", "humid"]
 WEATHER_PAST_ONLY_COLUMNS = ["sunshine", "irradiance"]
+
+
+def _dew_point_celsius(temp_c: pd.Series, humid: pd.Series) -> pd.Series:
+	# Magnus formula approximation
+	a, b = 17.27, 237.7
+	alpha = (a * temp_c) / (b + temp_c) + np.log(humid.clip(1e-6, 100.0) / 100.0)
+	return (b * alpha) / (a - alpha)
+
+
+def _heat_index_celsius(temp_c: pd.Series, humid: pd.Series) -> pd.Series:
+	# Rothfusz regression (approx, converted to Celsius)
+	T = temp_c * 9 / 5 + 32
+	R = humid
+	HI_f = (
+		-42.379 + 2.04901523 * T + 10.14333127 * R - 0.22475541 * T * R
+		- 6.83783e-3 * T ** 2 - 5.481717e-2 * R ** 2 + 1.22874e-3 * T ** 2 * R
+		+ 8.5282e-4 * T * R ** 2 - 1.99e-6 * T ** 2 * R ** 2
+	)
+	return (HI_f - 32) * 5 / 9
 
 
 class FeatureBuilder:
@@ -68,6 +88,7 @@ class FeatureBuilder:
 		df["is_weekend"] = (df["dayofweek"].isin([5, 6])).astype(int)
 		df["dayofyear"] = df["timestamp"].dt.dayofyear
 		df["month"] = df["timestamp"].dt.month
+		df["hour_of_week"] = (df["dayofweek"] * 24 + df["hour"]).astype(int)
 		# Cyclical encodings
 		df["hour_sin"] = np.sin(2 * np.pi * df["hour"] / 24)
 		df["hour_cos"] = np.cos(2 * np.pi * df["hour"] / 24)
@@ -98,6 +119,12 @@ class FeatureBuilder:
 				diff_col = f"{col}_diff168"
 				df[diff_col] = df[col] - df[lag_col]
 				feature_cols.append(diff_col)
+
+		# Thermo indices
+		if "temp" in df.columns and "humid" in df.columns:
+			df["dew_point"] = _dew_point_celsius(df["temp"], df["humid"])
+			df["heat_index"] = _heat_index_celsius(df["temp"], df["humid"])
+			feature_cols += ["dew_point", "heat_index"]
 
 		# Sunshine/Irradiance: past-only when present in df
 		for col in WEATHER_PAST_ONLY_COLUMNS:
