@@ -17,9 +17,9 @@
 | 9 | outputs/submissions/sub_cat_anchor.csv | 2025-08-20 10:29 | 14.5174723908 | CatBoost: 앵커드CV만(가중/바이어스 없음), OOF≈12.06 |
 | 10 | outputs/submissions/sub_cat_smape_anchor.csv | 2025-08-20 10:30 | 9.8885150109 | CatBoost: 앵커드CV+SMAPE 가중(바이어스 없음), OOF≈9.82 |
 | 11 | outputs/submissions/sub_cat_smape_anchor_nowhat.csv | 2025-08-21 14:16 | 9.7389765023 | CatBoost: 앵커드CV+SMAPE 가중+now_hat(일조/일사), OOF≈9.76 |
-| 12 | outputs/submissions/sub_cat_tune_d6_lr005_l2_3.csv | 2025-08-21 14:47 |  | Cat 튠 A(depth=6, lr=0.05, l2=3), now_hat 포함 |
-| 13 | outputs/submissions/sub_cat_tune_d10_lr003_l2_6.csv | 2025-08-21 14:50 |  | Cat 튠 B(depth=10, lr=0.03, l2=6), now_hat 포함 |
-| 14 | outputs/submissions/sub_cat_type_ensemble.csv | 2025-08-21 15:08 |  | 타입별 소모델 앙상블(depth=8, lr=0.05, l2=3), now_hat 포함 |
+| 12 | outputs/submissions/sub_cat_tune_d6_lr005_l2_3.csv | 2025-08-21 14:47 | 9.7142185196 | Cat 튠 A(depth=6, lr=0.05, l2=3), now_hat 포함 |
+| 13 | outputs/submissions/sub_cat_tune_d10_lr003_l2_6.csv | 2025-08-21 14:50 | 9.366959767 | Cat 튠 B(depth=10, lr=0.03, l2=6), now_hat 포함 |
+| 14 | outputs/submissions/sub_cat_type_ensemble.csv | 2025-08-21 15:08 | 10.6225078129	 | 타입별 소모델 앙상블(depth=8, lr=0.05, l2=3), now_hat 포함 |
 
 가이드
 - 점수 입력 형식 예: `18.1558674197` -> 해당 사이에서 submission csv 넣을 시 단일 점수만줌. 
