@@ -23,8 +23,10 @@ LOAD_FEATURE_COLUMNS = [
 	"lag_1",
 	"lag_24",
 	"lag_168",
+	"lag_336",
 	"roll_mean_24",
 	"roll_mean_168",
+	"roll_mean_336",
 	"roll_std_24",
 ]
 
@@ -102,9 +104,11 @@ class FeatureBuilder:
 			df["lag_1"] = g["load"].shift(1)
 			df["lag_24"] = g["load"].shift(24)
 			df["lag_168"] = g["load"].shift(168)
+			df["lag_336"] = g["load"].shift(336)
 			# rolling with shift(1) to avoid leakage
 			df["roll_mean_24"] = g["load"].shift(1).rolling(24, min_periods=1).mean()
 			df["roll_mean_168"] = g["load"].shift(1).rolling(168, min_periods=1).mean()
+			df["roll_mean_336"] = g["load"].shift(1).rolling(336, min_periods=1).mean()
 			df["roll_std_24"] = g["load"].shift(1).rolling(24, min_periods=2).std()
 			feature_cols += LOAD_FEATURE_COLUMNS
 

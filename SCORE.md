@@ -20,6 +20,9 @@
 | 12 | outputs/submissions/sub_cat_tune_d6_lr005_l2_3.csv | 2025-08-21 14:47 | 9.7142185196 | Cat 튠 A(depth=6, lr=0.05, l2=3), now_hat 포함 |
 | 13 | outputs/submissions/sub_cat_tune_d10_lr003_l2_6.csv | 2025-08-21 14:50 | 9.366959767 | Cat 튠 B(depth=10, lr=0.03, l2=6), now_hat 포함 |
 | 14 | outputs/submissions/sub_cat_type_ensemble.csv | 2025-08-21 15:08 | 10.6225078129	 | 타입별 소모델 앙상블(depth=8, lr=0.05, l2=3), now_hat 포함 |
+| 15 | outputs/submissions/sub_cat_ft_depth9_lr003_l2_6_decay.csv | 2025-08-23 21:30 | 9.6493305678 | Cat ft1(depth=9, lr=0.03, l2=6), time-decay+now_hat |
+| 16 | outputs/submissions/sub_cat_ft_depth10_lr0025_l2_6_decay.csv | 2025-08-23 21:36 | 10.0073275212 | Cat ft2(depth=10, lr=0.025, l2=6), time-decay+now_hat |
+| 17 | outputs/submissions/sub_cat_ft_depth8_lr0035_l2_4_decay.csv | 2025-08-23 21:40 | 10.0072784267 | Cat ft3(depth=8, lr=0.035, l2=4), time-decay+now_hat |
 
 가이드
 - 점수 입력 형식 예: `18.1558674197` -> 해당 사이에서 submission csv 넣을 시 단일 점수만줌. 
