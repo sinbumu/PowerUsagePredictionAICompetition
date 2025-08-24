@@ -23,6 +23,8 @@
 | 15 | outputs/submissions/sub_cat_ft_depth9_lr003_l2_6_decay.csv | 2025-08-23 21:30 | 9.6493305678 | Cat ft1(depth=9, lr=0.03, l2=6), time-decay+now_hat |
 | 16 | outputs/submissions/sub_cat_ft_depth10_lr0025_l2_6_decay.csv | 2025-08-23 21:36 | 10.0073275212 | Cat ft2(depth=10, lr=0.025, l2=6), time-decay+now_hat |
 | 17 | outputs/submissions/sub_cat_ft_depth8_lr0035_l2_4_decay.csv | 2025-08-23 21:40 | 10.0072784267 | Cat ft3(depth=8, lr=0.035, l2=4), time-decay+now_hat |
+| 18 | outputs/submissions/sub_cat_tuneb_nodecay_sc150.csv | 2025-08-23 22:17 | 9.5993265207 | Cat tuneB no-decay, smape_c=150 |
+| 19 | outputs/submissions/sub_cat_smape_anchor_nowhat_nodecay_sc150.csv | 2025-08-23 22:21 | 9.7844695479 | Cat anchor+SMAPE+now_hat(no-decay), smape_c=150 |
 
 가이드
 - 점수 입력 형식 예: `18.1558674197` -> 해당 사이에서 submission csv 넣을 시 단일 점수만줌. 

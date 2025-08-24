@@ -65,7 +65,7 @@ def _time_decay(ts: pd.Series, strength: float = 0.3) -> np.ndarray:
     return (1.0 - strength) + (2*strength) * pos
 
 
-def train_cat_residual(train_df: pd.DataFrame, building_info: pd.DataFrame, save_dir: str = os.path.join(MODELS_DIR, "cat_resid"), params: Optional[Dict] = None, use_last_weeks_cv: bool = True, smape_weight_c: float = 200.0, save_bias: bool = True) -> Dict[str, float]:
+def train_cat_residual(train_df: pd.DataFrame, building_info: pd.DataFrame, save_dir: str = os.path.join(MODELS_DIR, "cat_resid"), params: Optional[Dict] = None, use_last_weeks_cv: bool = True, smape_weight_c: float = 200.0, save_bias: bool = True, time_decay_strength: float = 0.0) -> Dict[str, float]:
 	os.makedirs(save_dir, exist_ok=True)
 	fb = FeatureBuilder()
 	fe, _ = fb.transform(train_df, building_info=building_info)
@@ -99,7 +99,8 @@ def train_cat_residual(train_df: pd.DataFrame, building_info: pd.DataFrame, save
 	# sample weights to approximate SMAPE (down-weight large |y|)
 	w = 1.0 / (np.abs(fe["load"].values) + smape_weight_c)
 	# time-decay weights (closer to end gets larger weight)
-	w = w * _time_decay(fe["timestamp"], strength=0.3)
+	if time_decay_strength > 0:
+		w = w * _time_decay(fe["timestamp"], strength=time_decay_strength)
 
 	if not _HAS_CAT:
 		for c in cat_cols:
