@@ -25,6 +25,10 @@
 | 17 | outputs/submissions/sub_cat_ft_depth8_lr0035_l2_4_decay.csv | 2025-08-23 21:40 | 10.0072784267 | Cat ft3(depth=8, lr=0.035, l2=4), time-decay+now_hat |
 | 18 | outputs/submissions/sub_cat_tuneb_nodecay_sc150.csv | 2025-08-23 22:17 | 9.5993265207 | Cat tuneB no-decay, smape_c=150 |
 | 19 | outputs/submissions/sub_cat_smape_anchor_nowhat_nodecay_sc150.csv | 2025-08-23 22:21 | 9.7844695479 | Cat anchor+SMAPE+now_hat(no-decay), smape_c=150 |
+| 20 | outputs/submissions/sub_xgb.csv | 2025-08-24 22:39 | 11.9557977306 | XGBoost 잔차모델(앵커 3주 CV), OOF≈8.50 |
+| 21 | outputs/submissions/sub_cat_tuneb_lr0028.csv | 2025-08-24 22:52 | 9.7699871108 | Cat tuneB lr=0.028(no-decay), smape_c=150 |
+| 22 | outputs/submissions/sub_cat_tuneb_lr0032.csv | 2025-08-24 22:56 | 9.9657743314 | Cat tuneB lr=0.032(no-decay), smape_c=150 |
+| 23 | outputs/submissions/sub_cat_tuneb_l2_7.csv | 2025-08-24 23:00 | 9.9721134586 | Cat tuneB l2=7(no-decay), smape_c=150 |
 
 가이드
 - 점수 입력 형식 예: `18.1558674197` -> 해당 사이에서 submission csv 넣을 시 단일 점수만줌. 
